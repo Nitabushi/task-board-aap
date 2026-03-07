@@ -31,8 +31,8 @@
 1. リポジトリをクローン
 
 ```bash
-git clone https://github.com/<your-username>/task-board.git
-cd task-board
+git clone https://github.com/Nitabushi/task-board-aap.git
+cd task-board-aap
 ```
 
 2. VS Code で開き、Dev Container で起動
