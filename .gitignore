@@ -3,6 +3,7 @@
 # ===========================
 backend/.env
 backend/.env.backup
+backend/.env.testing
 backend/.env.*.local
 backend/vendor/
 backend/node_modules/
@@ -41,8 +42,9 @@ docker-compose.override.yml
 # ===========================
 .DS_Store
 Thumbs.db
-.vscode/
+.vscode/*
 !.vscode/extensions.json
+!**/.vscode/extensions.json
 .idea/
 *.swp
 *.swo
