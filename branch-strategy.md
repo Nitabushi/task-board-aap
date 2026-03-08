@@ -10,30 +10,33 @@ main ← 安定版（リリース可能な状態のみ）
 
 ### ブランチの役割
 
-| ブランチ | 用途 | 作成元 | マージ先 | 直接push |
-|---------|------|--------|---------|---------|
-| main | 安定版。リリース可能な状態のみ | - | - | ❌ 禁止（#5まで作業済み） |
-| develop | 開発のベースブランチ | main | main（release経由） | ⚠️ 小さな修正のみ可 |
-| feature/* | 機能開発。Issue単位で作成 | develop | develop | ✅ |
-| release/* | リリース前の最終調整・結合テスト | develop | main + develop | ✅ |
-| hotfix/* | 本番の緊急バグ修正 | main | main + develop | ✅ |
+| ブランチ   | 用途                             | 作成元  | マージ先            | 直接push                  |
+| ---------- | -------------------------------- | ------- | ------------------- | ------------------------- |
+| main       | 安定版。リリース可能な状態のみ   | -       | -                   | ❌ 禁止（#5まで作業済み） |
+| develop    | 開発のベースブランチ             | main    | main（release経由） | ⚠️ 小さな修正のみ可       |
+| feature/\* | 機能開発。Issue単位で作成        | develop | develop             | ✅                        |
+| release/\* | リリース前の最終調整・結合テスト | develop | main + develop      | ✅                        |
+| hotfix/\*  | 本番の緊急バグ修正               | main    | main + develop      | ✅                        |
 
 ### 各ブランチの詳細
 
-#### feature/*
+#### feature/\*
+
 - 機能開発やドキュメント作成に使用
 - Issue単位で作成し、完了後に `develop` へPRを作成してマージ
 - PRでコード差分を確認することがレビューの代わりとなる
 - 命名規則: `feature/issue番号-簡潔な説明`
 
-#### release/*
+#### release/\*
+
 - 全機能が `develop` に揃った段階で作成
 - リリース前の結合テスト・バグ修正・ドキュメント最終調整を行う
 - 問題なければ `main` と `develop` の両方にマージ
 - 命名規則: `release/バージョン`（例: `release/1.0.0`）
 - 本プロジェクトでは Phase 3（Issue #16〜#18）で使用
 
-#### hotfix/*
+#### hotfix/\*
+
 - `main` で発見された緊急バグの修正に使用
 - 修正後、`main` と `develop` の両方にマージ
 - 命名規則: `hotfix/簡潔な説明`（例: `hotfix/login-csrf-fix`）
@@ -53,44 +56,42 @@ main ← 安定版（リリース可能な状態のみ）
 ### ブランチ運用開始手順
 
 Issue #5 完了後、以下を実行して `develop` ブランチを作成する：
+
 1. `main` の最新状態から `develop` を作成
 2. 以降は `develop` から `feature/*` を切って作業
 
 ### ブランチ一覧（Issue対応）
 
 #### Phase 0 - 環境準備（main で作業済み）
-| Issue | ブランチ |
-|-------|---------|
-| #1 | main（作業済み） |
-| #2 | main（作業済み） |
-| #3 | main（作業済み） |
-| #4 | main（作業済み） |
+
+| Issue | ブランチ         |
+| ----- | ---------------- |
+| #1    | main（作業済み） |
+| #2    | main（作業済み） |
+| #3    | main（作業済み） |
+| #4    | main（作業済み） |
 
 #### Phase 1 - 仕様策定
-| Issue | ブランチ |
-|-------|---------|
-| #5 | main（作業済み） |
-| #6 | feature/6-design |
-| #7 | feature/7-test-plan |
+
+| Issue | ブランチ            |
+| ----- | ------------------- |
+| #5    | main（作業済み）    |
+| #7    | feature/6-design    |
+| #8    | feature/8-test-plan |
 
 #### Phase 2 - 実装
-| Issue | ブランチ |
-|-------|---------|
-| #8 | feature/8-laravel-init |
-| #9 | feature/9-auth-api |
-| #10 | feature/10-task-crud-api |
-| #11 | feature/11-admin-api |
-| #12 | feature/12-vue-init |
-| #13 | feature/13-login-page |
-| #14 | feature/14-kanban-board |
-| #15 | feature/15-admin-users-page |
+
+| Issue | ブランチ               |
+| ----- | ---------------------- |
+| #8    | feature/8-laravel-init |
 
 #### Phase 3 - テスト・仕上げ
-| Issue | ブランチ |
-|-------|---------|
-| #16 | release/1.0.0（結合テスト） |
-| #17 | release/1.0.0（ドキュメント整備、#16と同一ブランチ） |
-| #18 | release/1.0.0（最終確認、#16と同一ブランチ） |
+
+| Issue | ブランチ                                             |
+| ----- | ---------------------------------------------------- |
+| #16   | release/1.0.0（結合テスト）                          |
+| #17   | release/1.0.0（ドキュメント整備、#16と同一ブランチ） |
+| #18   | release/1.0.0（最終確認、#16と同一ブランチ）         |
 
 ### マージフロー図
 
