@@ -205,6 +205,8 @@ HTMLモックアップは [mockup/](mockup/) を参照。
 | 優先度     | ○                 | medium     | high / medium / low       |
 | 期限日     | ✕                 | -          | 有効な日付形式            |
 
+> **F-007 フォールバック仕様について**: ステータスフィールドのセレクトボックスが、要件定義書 F-007「ドラッグ&ドロップが難しい場合のフォールバック」を兼ねる。タスク編集モーダルを開いてステータスを変更・保存することでD&Dと同等の操作が可能。
+
 ---
 
 ### 3.4 S-004: ユーザー管理画面
@@ -572,6 +574,8 @@ class User extends Authenticatable
 
     protected $casts = [
         'deleted_at' => 'datetime',
+        // role は PHP の string として扱う（BackedEnum は使用しない）
+        // バリデーションは FormRequest（in:admin,user）で保証する
     ];
 
     public function tasks(): HasMany { ... }

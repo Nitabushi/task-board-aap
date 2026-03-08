@@ -306,6 +306,12 @@ paths:
       description: |
         ログイン前にこのエンドポイントを呼び出してCSRFトークンをCookieに設定する。
         以降のリクエストでXSRF-TOKENヘッダーが自動付与される。
+
+        **注意**: このエンドポイントは `/api` 配下ではなく、Laravelのルートパスに存在する。
+        実際のURLは `http://localhost:8000/sanctum/csrf-cookie`。
+      servers:
+        - url: http://localhost:8000
+          description: ローカル開発環境（Sanctum専用 - /api なし）
       responses:
         "204":
           description: CSRFクッキーを設定（レスポンスボディなし）
@@ -319,6 +325,10 @@ paths:
         メールアドレスとパスワードでログインする。
         成功時にセッションを開始し、ログインユーザー情報を返す。
         論理削除済みユーザーはログイン不可。
+
+        **認証失敗時のステータスコードについて**: 認証失敗は `422 Unprocessable Entity` を返す。
+        これはLaravelの `Auth::attempt()` 失敗時にバリデーション例外（`ValidationException`）として扱うデフォルト挙動に従ったもの。
+        `401 Unauthorized` ではなく422を意図的に使用している。
       requestBody:
         required: true
         content:
