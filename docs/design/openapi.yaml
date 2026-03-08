@@ -1,0 +1,688 @@
+openapi: 3.0.3
+
+info:
+  title: Task Board API
+  description: |
+    タスク管理アプリ（Task Board）のREST API仕様書。
+    認証方式: Laravel Sanctum（SPA認証、Cookieベース）
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000/api
+    description: ローカル開発環境
+
+tags:
+  - name: 認証
+    description: ログイン・ログアウト・ユーザー情報取得
+  - name: タスク
+    description: タスクのCRUD操作（認証必須）
+  - name: ユーザー管理
+    description: ユーザーのCRUD操作（管理者のみ）
+
+# ─────────────────────────────────────────────────────────────
+# セキュリティスキーム
+# ─────────────────────────────────────────────────────────────
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: laravel_session
+      description: |
+        Laravel Sanctum SPA認証。
+        ログイン前に GET /sanctum/csrf-cookie でCSRFトークンを取得する。
+
+  # ─────────────────────────────────────────────────────────────
+  # スキーマ定義
+  # ─────────────────────────────────────────────────────────────
+  schemas:
+    # ─── タスク ───
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 2
+        title:
+          type: string
+          example: プロジェクト計画書の作成
+        description:
+          type: string
+          nullable: true
+          example: 第1四半期のプロジェクト計画を作成する
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+          example: todo
+        priority:
+          type: string
+          enum: [high, medium, low]
+          example: high
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-03-14"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-03-07T00:00:00.000000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-03-07T00:00:00.000000Z"
+
+    TaskInput:
+      type: object
+      required: [title, status, priority]
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          example: プロジェクト計画書の作成
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          example: 第1四半期のプロジェクト計画を作成する
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+          default: todo
+          example: todo
+        priority:
+          type: string
+          enum: [high, medium, low]
+          default: medium
+          example: high
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-03-14"
+
+    TaskStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+          example: in_progress
+
+    # ─── ユーザー ───
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: 管理者太郎
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        role:
+          type: string
+          enum: [admin, user]
+          example: admin
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-03-07T00:00:00.000000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-03-07T00:00:00.000000Z"
+
+    UserCreateInput:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: 一般太郎
+        email:
+          type: string
+          format: email
+          example: user3@example.com
+        password:
+          type: string
+          minLength: 8
+          example: password123
+        role:
+          type: string
+          enum: [admin, user]
+          example: user
+
+    UserUpdateInput:
+      type: object
+      required: [name, email, role]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: 一般太郎（更新）
+        email:
+          type: string
+          format: email
+          example: user3-updated@example.com
+        password:
+          type: string
+          minLength: 8
+          nullable: true
+          description: 空欄の場合はパスワードを変更しない
+          example: ""
+        role:
+          type: string
+          enum: [admin, user]
+          example: user
+
+    # ─── 認証 ───
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        password:
+          type: string
+          example: password
+
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: 管理者太郎
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        role:
+          type: string
+          enum: [admin, user]
+          example: admin
+
+    # ─── エラー ───
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: エラーメッセージ
+      required: [message]
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 入力内容を確認してください。
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            title: ["タイトルは必須です。"]
+            email: ["このメールアドレスはすでに使用されています。"]
+      required: [message, errors]
+
+  # ─────────────────────────────────────────────────────────────
+  # 共通レスポンス
+  # ─────────────────────────────────────────────────────────────
+  responses:
+    Unauthenticated:
+      description: 未認証（セッションが無効）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Unauthenticated."
+
+    Forbidden:
+      description: 権限なし
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "アクセス権限がありません。"
+
+    NotFound:
+      description: リソースが見つからない
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "リソースが見つかりません。"
+
+    ValidationError:
+      description: バリデーションエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+
+    ServerError:
+      description: サーバーエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "サーバーエラーが発生しました。"
+
+# ─────────────────────────────────────────────────────────────
+# エンドポイント定義
+# ─────────────────────────────────────────────────────────────
+paths:
+
+  # ─── CSRF ───
+  /sanctum/csrf-cookie:
+    get:
+      tags: [認証]
+      summary: CSRFクッキー取得
+      description: |
+        ログイン前にこのエンドポイントを呼び出してCSRFトークンをCookieに設定する。
+        以降のリクエストでXSRF-TOKENヘッダーが自動付与される。
+      responses:
+        "204":
+          description: CSRFクッキーを設定（レスポンスボディなし）
+
+  # ─── 認証 ───
+  /login:
+    post:
+      tags: [認証]
+      summary: ログイン
+      description: |
+        メールアドレスとパスワードでログインする。
+        成功時にセッションを開始し、ログインユーザー情報を返す。
+        論理削除済みユーザーはログイン不可。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        "200":
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+              example:
+                id: 1
+                name: 管理者太郎
+                email: admin@example.com
+                role: admin
+        "422":
+          description: 認証失敗（メールアドレスまたはパスワードが正しくない）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "メールアドレスまたはパスワードが正しくありません。"
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /logout:
+    post:
+      tags: [認証]
+      summary: ログアウト
+      description: セッションを破棄しログアウトする。
+      security:
+        - cookieAuth: []
+      responses:
+        "204":
+          description: ログアウト成功（レスポンスボディなし）
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+
+  /user:
+    get:
+      tags: [認証]
+      summary: ログインユーザー情報取得
+      description: 現在ログイン中のユーザー情報を返す。
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: ユーザー情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+
+  # ─── タスク ───
+  /tasks:
+    get:
+      tags: [タスク]
+      summary: タスク一覧取得
+      description: ログインユーザー自身のタスク一覧を取得する。他ユーザーのタスクは含まれない。
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: タスク一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+              example:
+                data:
+                  - id: 1
+                    user_id: 2
+                    title: プロジェクト計画書の作成
+                    description: null
+                    status: todo
+                    priority: high
+                    due_date: "2026-03-14"
+                    created_at: "2026-03-07T00:00:00.000000Z"
+                    updated_at: "2026-03-07T00:00:00.000000Z"
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags: [タスク]
+      summary: タスク作成
+      description: 新規タスクを作成する。作成者はログインユーザーに自動設定される。
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+      responses:
+        "201":
+          description: タスク作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Task'
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: タスクID
+
+    put:
+      tags: [タスク]
+      summary: タスク更新
+      description: 指定したタスクを更新する。自分のタスクのみ操作可能。
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+      responses:
+        "200":
+          description: タスク更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Task'
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      tags: [タスク]
+      summary: タスク削除
+      description: 指定したタスクを削除する。自分のタスクのみ操作可能。
+      security:
+        - cookieAuth: []
+      responses:
+        "204":
+          description: タスク削除成功（レスポンスボディなし）
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /tasks/{id}/status:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: タスクID
+
+    patch:
+      tags: [タスク]
+      summary: タスクステータス更新
+      description: |
+        タスクのステータスのみを更新する。ドラッグ&ドロップによるカラム移動時に使用。
+        自分のタスクのみ操作可能。
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskStatusInput'
+      responses:
+        "200":
+          description: ステータス更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Task'
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  # ─── ユーザー管理（管理者のみ） ───
+  /admin/users:
+    get:
+      tags: [ユーザー管理]
+      summary: ユーザー一覧取得（管理者のみ）
+      description: 全ユーザーの一覧を取得する。論理削除済みユーザーも含む。
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: ユーザー一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+              example:
+                data:
+                  - id: 1
+                    name: 管理者太郎
+                    email: admin@example.com
+                    role: admin
+                    deleted_at: null
+                    created_at: "2026-03-07T00:00:00.000000Z"
+                    updated_at: "2026-03-07T00:00:00.000000Z"
+                  - id: 3
+                    name: 一般次郎
+                    email: user2@example.com
+                    role: user
+                    deleted_at: "2026-03-08T12:00:00.000000Z"
+                    created_at: "2026-03-07T00:00:00.000000Z"
+                    updated_at: "2026-03-08T12:00:00.000000Z"
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags: [ユーザー管理]
+      summary: ユーザー作成（管理者のみ）
+      description: 新規ユーザーを作成する。パスワードはbcryptでハッシュ化される。
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateInput'
+      responses:
+        "201":
+          description: ユーザー作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+  /admin/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ユーザーID
+
+    put:
+      tags: [ユーザー管理]
+      summary: ユーザー編集（管理者のみ）
+      description: |
+        ユーザー情報を更新する。
+        論理削除済みユーザーは編集不可（404を返す）。
+        パスワードは空欄の場合は変更しない。
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateInput'
+      responses:
+        "200":
+          description: ユーザー更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "500":
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      tags: [ユーザー管理]
+      summary: ユーザー論理削除（管理者のみ）
+      description: |
+        ユーザーを論理削除する（deleted_at に削除日時をセット）。
+        対象ユーザーのタスクは物理削除される。
+        自分自身は削除不可（403を返す）。
+      security:
+        - cookieAuth: []
+      responses:
+        "204":
+          description: ユーザー論理削除成功（レスポンスボディなし）
+        "401":
+          $ref: '#/components/responses/Unauthenticated'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/ServerError'

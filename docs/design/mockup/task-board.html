@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S-002: タスクボード画面 - Task Board モックアップ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- ヘッダー -->
+  <header class="bg-indigo-600 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="text-lg font-bold tracking-wide">Task Board</h1>
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="user-management.html" class="hover:underline opacity-90">ユーザー管理</a>
+        <span class="opacity-40">|</span>
+        <span class="opacity-80">管理者太郎</span>
+        <button class="bg-white text-indigo-600 font-medium px-3 py-1 rounded hover:bg-indigo-50 transition-colors">
+          ログアウト
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- フィルタバー -->
+  <div class="max-w-7xl mx-auto px-4 py-4">
+    <div class="bg-white rounded-xl shadow-sm px-4 py-3 flex flex-wrap items-center gap-3">
+      <!-- 検索 -->
+      <div class="flex items-center gap-2 flex-1 min-w-48">
+        <label class="text-sm text-gray-500 whitespace-nowrap">検索:</label>
+        <input
+          type="text"
+          placeholder="キーワードを入力..."
+          class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        />
+      </div>
+
+      <!-- ステータスフィルタ -->
+      <div class="flex items-center gap-2">
+        <label class="text-sm text-gray-500 whitespace-nowrap">ステータス:</label>
+        <select class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option>全て</option>
+          <option>TODO</option>
+          <option>進行中</option>
+          <option>完了</option>
+        </select>
+      </div>
+
+      <!-- 優先度フィルタ -->
+      <div class="flex items-center gap-2">
+        <label class="text-sm text-gray-500 whitespace-nowrap">優先度:</label>
+        <select class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option>全て</option>
+          <option>高</option>
+          <option>中</option>
+          <option>低</option>
+        </select>
+      </div>
+
+      <!-- タスク追加ボタン -->
+      <a href="task-modal.html" class="ml-auto">
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
+          ＋ タスク追加
+        </button>
+      </a>
+    </div>
+  </div>
+
+  <!-- カンバンボード -->
+  <div class="max-w-7xl mx-auto px-4 pb-8">
+    <div class="grid grid-cols-3 gap-4">
+
+      <!-- TODO カラム -->
+      <div class="bg-white rounded-xl shadow-sm">
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+          <h2 class="font-semibold text-gray-700 text-sm">TODO</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">2</span>
+        </div>
+        <div class="p-3 space-y-3">
+
+          <!-- タスクカード 1 -->
+          <a href="task-modal.html">
+            <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md hover:border-indigo-300 cursor-pointer transition-all">
+              <p class="text-sm font-medium text-gray-800 mb-2">プロジェクト計画書の作成</p>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium bg-red-100 text-red-600 px-2 py-0.5 rounded-full">高</span>
+                <span class="text-xs text-gray-400">期限: 2026/03/14</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- タスクカード 2 -->
+          <a href="task-modal.html">
+            <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md hover:border-indigo-300 cursor-pointer transition-all">
+              <p class="text-sm font-medium text-gray-800 mb-2">チームミーティングの準備</p>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">中</span>
+                <span class="text-xs text-gray-400">期限: 2026/03/10</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- 進行中 カラム -->
+      <div class="bg-white rounded-xl shadow-sm">
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+          <h2 class="font-semibold text-gray-700 text-sm">進行中</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">1</span>
+        </div>
+        <div class="p-3 space-y-3">
+
+          <!-- タスクカード -->
+          <a href="task-modal.html">
+            <div class="bg-white border border-blue-200 rounded-lg p-3 shadow-sm hover:shadow-md hover:border-indigo-300 cursor-pointer transition-all">
+              <p class="text-sm font-medium text-gray-800 mb-2">ミーティング資料の準備</p>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">中</span>
+                <span class="text-xs text-gray-400">期限: 2026/03/11</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- 完了 カラム -->
+      <div class="bg-white rounded-xl shadow-sm">
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+          <h2 class="font-semibold text-gray-700 text-sm">完了</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">1</span>
+        </div>
+        <div class="p-3 space-y-3">
+
+          <!-- タスクカード（完了：グレー） -->
+          <a href="task-modal.html">
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md cursor-pointer transition-all opacity-70">
+              <p class="text-sm font-medium text-gray-500 line-through mb-2">週次レポートの提出</p>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium bg-green-100 text-green-600 px-2 py-0.5 rounded-full">低</span>
+                <span class="text-xs text-gray-400">期限: 2026/03/07</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 注釈 -->
+  <p class="text-center text-xs text-gray-400 pb-4">
+    ※ このページはHTMLモックアップです（動作しません）
+  </p>
+
+</body>
+</html>
