@@ -47,7 +47,7 @@ task-board/
 - **要件定義書**: `docs/requirements/requirements.md`
 - **設計書**: `docs/design/`（画面設計、DB設計）
 - **API仕様書**: `docs/design/openapi.yaml`（Swagger / OpenAPI 3.0、設計フェーズで作成）
-- **テスト計画書**: `docs/test-plan.md`
+- **テスト計画書**: `docs/test/test-plan.md`
 
 ## コーディング規約
 
