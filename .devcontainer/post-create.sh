@@ -12,6 +12,7 @@ if [ -d "/workspace/backend" ]; then
         cp .env.example .env
         php artisan key:generate
     fi
+    php artisan migrate --seed
 fi
 
 # Frontend setup
